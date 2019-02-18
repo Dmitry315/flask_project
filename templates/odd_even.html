@@ -1,0 +1,12 @@
+{% extends 'wrapper.html' %}
+
+{% block title %}
+    file
+{% endblock title %}
+
+{% block content %}
+<form method="post" enctype="multipart/form-data">
+    <input id="number" class="form-control" name="number" >
+    <button type="submit" class="btn btn-primary">Отправить</button>
+</form>
+{% endblock content %}
