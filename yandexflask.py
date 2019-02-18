@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, redirect
 from login import *
 from json import loads
 
@@ -46,6 +46,30 @@ def news():
     with open('news.json') as f:
         jsn = loads(f.read())
     return render_template('news.html', news=jsn)
+
+@app.route('/greet/<name>')
+def greet(name):
+    return 'Здравствуйте, ' + name + '!'
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    form = LoginForm()
+    if form.validate_on_submit():
+        with open('users.json', encoding='utf-8') as f:
+            jsn = loads(f.read())
+        login = request.form['login']
+        password = request.form['password']
+        form.login.errors = ['Wrong login']
+        form.password.errors = []
+        for i in jsn:
+            if i['login'] == login:
+                form.login.errors = []
+                if i['password'] != password:
+                    form.password.errors = ['Wrong password']
+                    break
+        if not form.login.errors and not form.password.errors:
+            return redirect('/greet/' + login)
+    return render_template('login.html', title='Авторизация', form=form)
 
 
 if __name__ == '__main__':
