@@ -27,5 +27,18 @@ def file_sample():
                 new.write(str(i))
         return 'success'
 
+@app.route('/odd_even', methods=['POST', 'GET'])
+def odd_even():
+    if request.method == 'GET':
+        return render_template('odd_even.html')
+    elif request.method == 'POST':
+        num = request.form['number']
+        try:
+            new_num = int(num)
+            return num + ' - ' + ('нечётное' if new_num % 2 else 'чётное')
+        except:
+            return num + ' не является корректным целым числом'
+
+
 if __name__ == '__main__':
     app.run(port=8000, host='127.0.0.1')
