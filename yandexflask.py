@@ -1,7 +1,9 @@
 from flask import Flask, render_template, request
-from os import getcwd
+from login import *
+from json import loads
 
 app = Flask(__name__)
+app.config['SECRET_KEY'] = '1515dd15dd3d5d1a51b5af515ca'
 
 @app.route('/form_sample', methods=['POST', 'GET'])
 def sample():
@@ -38,6 +40,12 @@ def odd_even():
             return num + ' - ' + ('нечётное' if new_num % 2 else 'чётное')
         except:
             return num + ' не является корректным целым числом'
+
+@app.route('/news')
+def news():
+    with open('news.json') as f:
+        jsn = loads(f.read())
+    return render_template('news.html', news=jsn)
 
 
 if __name__ == '__main__':

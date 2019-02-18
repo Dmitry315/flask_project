@@ -1,0 +1,12 @@
+{% extends 'wrapper.html' %}
+
+{% block title %}
+    news
+{% endblock title %}
+
+{% block content %}
+    {% for i in news %}
+        <h2>{{ i['title'] }}</h2>
+        <div>{{ i['text'] }}</div>
+    {% endfor %}
+{% endblock content %}
