@@ -13,13 +13,13 @@ class DB:
         self.conn.close()
 
 
-class UsersModel:
+class UserModel:
     def __init__(self, connection):
         self.connection = connection
 
     def init_table(self):
         cursor = self.connection.cursor()
-        cursor.execute('''CREATE TABLE IF NOT EXISTS users 
+        cursor.execute('''CREATE TABLE IF NOT EXISTS users
                                 (id INTEGER PRIMARY KEY AUTOINCREMENT, 
                                  user_name VARCHAR(50),
                                  password_hash VARCHAR(128)
@@ -30,9 +30,9 @@ class UsersModel:
     def exists(self, user_name):
         cursor = self.connection.cursor()
         cursor.execute("SELECT * FROM users WHERE user_name = ?",
-                       (user_name,))
+                       (user_name, ))
         row = cursor.fetchone()
-        return (True, row[0]) if row else (False,)
+        return (True, row) if row else (False,)
 
     def get(self, user_id):
         cursor = self.connection.cursor()
@@ -42,14 +42,14 @@ class UsersModel:
 
     def get_all(self):
         cursor = self.connection.cursor()
-        cursor.execute("SELECT * FROM users", (str(id)))
+        cursor.execute("SELECT * FROM users")
         row = cursor.fetchall()
         return row
 
 
 class NewsModel:
     def __init__(self, connection):
-        self.conection = connection
+        self.connection = connection
 
     def init_table(self):
         cursor = self.connection.cursor()
