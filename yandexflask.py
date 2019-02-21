@@ -7,9 +7,9 @@ app.config['SECRET_KEY'] = '1515dd15dd3d5d1a51b5af515ca'
 db = DB()
 user_model = UserModel(db.get_connection())
 user_model.init_table()
-nm = UserModel(db.get_connection())
+nm = NewsModel(db.get_connection())
 nm.init_table()
-
+user_model.insert('admin', 'admin')
 
 @app.route('/')
 @app.route('/index')

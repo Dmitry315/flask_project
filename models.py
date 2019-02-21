@@ -27,6 +27,14 @@ class UserModel:
         cursor.close()
         self.connection.commit()
 
+    def insert(self, user_name, password_hash):
+        cursor = self.connection.cursor()
+        cursor.execute('''INSERT INTO users 
+                          (user_name, password_hash) 
+                          VALUES (?,?)''', (user_name, password_hash))
+        cursor.close()
+        self.connection.commit()
+
     def exists(self, user_name):
         cursor = self.connection.cursor()
         cursor.execute("SELECT * FROM users WHERE user_name = ?",
