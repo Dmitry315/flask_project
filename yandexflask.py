@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, redirect
-from login import *
+from forms import *
 from json import loads
 
 app = Flask(__name__)
