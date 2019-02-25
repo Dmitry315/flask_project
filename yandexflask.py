@@ -17,12 +17,50 @@ def index():
     try:
         if not session['username']:
             return redirect('/login')
-        news = NewsModel(db.get_connection()).get_all(session['user_id'])
+        news = nm.get_all(session['user_id'])
+        news = sorted(news, key=lambda item: item[1])
+        news = sorted(news, key=lambda item: item[0])
         return render_template('index.html', username=session['username'], news=news)
     except KeyError as err:
         return redirect('/login')
 
 
+@app.route('/admin/login', methods=['GET', 'POST'])
+def admin_login():
+    form = LoginForm()
+    if form.validate_on_submit():
+        login = request.form['login']
+        password = request.form['password']
+        user = user_model.exists(login)
+        if not user[0]:
+            session['username'] = login
+            session['user_id'] = user[1][0]
+            user_model.insert(login, password)
+            return redirect("/index")
+    return render_template('login.html', title='Регистрация', form=form)
+
+@app.route('/admin', methods=['GET', 'POST'])
+def admin():
+    try:
+        if session['username'] == 'admin':
+            return render_template('admin.html', users=user_model.get_all(), news=nm)
+    except KeyError as err:
+        pass
+    return redirect('/admin/login')
+
+@app.route('/sign_in', methods=['GET', 'POST'])
+def sign_in():
+    form = LoginForm()
+    if form.validate_on_submit():
+        login = request.form['login']
+        password = request.form['password']
+        user = user_model.exists(login)
+        if not user[0]:
+            session['username'] = login
+            session['user_id'] = user[1][0]
+            user_model.insert(login, password)
+            return redirect("/index")
+    return render_template('login.html', title='Регистрация', form=form)
 
 @app.route('/logout')
 def logout():
@@ -41,7 +79,7 @@ def login():
             session['username'] = login
             session['user_id'] = user[1][0]
             return redirect("/index")
-    return render_template('login.html', title='Авторизация', form=form)
+    return render_template('login.html',title='Авторизация' , form=form)
 
 @app.route('/add_news', methods=['GET', 'POST'])
 def add_news():
