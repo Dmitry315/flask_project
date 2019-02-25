@@ -1,0 +1,12 @@
+{% extends "wrapper.html" %}
+
+{% block title %}
+    Admin
+{% endblock %}
+
+{% block content %}
+    <h1>Administration tool bar</h1>
+    {% for user in users %}
+        {{ user[1] }} made {{ news.get_all(user[0])|length }} articles <br>
+    {% endfor %}
+{% endblock %}
