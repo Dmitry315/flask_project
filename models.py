@@ -1,101 +1,34 @@
-import sqlite3
+from flask_sqlalchemy import SQLAlchemy
+from flask import Flask, render_template, request, redirect, session
+app = Flask(__name__)
+app.config['SECRET_KEY'] = '1515dd15dd3d5d1a51b5af515ca'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///users.db'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+db = SQLAlchemy(app)
 
 
-class DB:
-    def __init__(self):
-        conn = sqlite3.connect('news.db', check_same_thread=False)
-        self.conn = conn
+class YandexLyceumStudent(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(80), unique=True, nullable=False)
+    name = db.Column(db.String(80), unique=False, nullable=False)
+    surname = db.Column(db.String(80), unique=False, nullable=False)
+    email = db.Column(db.String(120), unique=True, nullable=False)
+    group = db.Column(db.String(80), unique=False, nullable=False)
+    year = db.Column(db.Integer, unique=False, nullable=False)
 
-    def get_connection(self):
-        return self.conn
-
-    def __del__(self):
-        self.conn.close()
-
-
-class UserModel:
-    def __init__(self, connection):
-        self.connection = connection
-
-    def init_table(self):
-        cursor = self.connection.cursor()
-        cursor.execute('''CREATE TABLE IF NOT EXISTS users
-                                (id INTEGER PRIMARY KEY AUTOINCREMENT, 
-                                 user_name VARCHAR(50),
-                                 password_hash VARCHAR(128)
-                                 )''')
-        cursor.close()
-        self.connection.commit()
-
-    def insert(self, user_name, password_hash):
-        cursor = self.connection.cursor()
-        cursor.execute('''INSERT INTO users 
-                          (user_name, password_hash) 
-                          VALUES (?,?)''', (user_name, password_hash))
-        cursor.close()
-        self.connection.commit()
-
-    def exists(self, user_name):
-        cursor = self.connection.cursor()
-        cursor.execute("SELECT * FROM users WHERE user_name = ?",
-                       (user_name, ))
-        row = cursor.fetchone()
-        return (True, row) if row else (False,)
-
-    def get(self, user_id):
-        cursor = self.connection.cursor()
-        cursor.execute("SELECT * FROM users WHERE id = ?", (str(user_id)))
-        row = cursor.fetchone()
-        return row
-
-    def get_all(self):
-        cursor = self.connection.cursor()
-        cursor.execute("SELECT * FROM users")
-        row = cursor.fetchall()
-        return row
+    def __repr__(self):
+        return '<YandexLyceumStudent {} {} {} {}>'.format(
+            self.id, self.username, self.name, self.surname)
 
 
-class NewsModel:
-    def __init__(self, connection):
-        self.connection = connection
+class SolutionAttempt(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    task = db.Column(db.String(80), unique=False, nullable=False)
+    code = db.Column(db.String(1000), unique=False, nullable=False)
+    status = db.Column(db.String(50), unique=False, nullable=False)
+    student_id = db.Column(db.Integer, db.ForeignKey('yandex_lyceum_student.id'), nullable=False)
+    student = db.relationship('YandexLyceumStudent', backref=db.backref('SolutionAttempts'))
 
-    def init_table(self):
-        cursor = self.connection.cursor()
-        cursor.execute('''CREATE TABLE IF NOT EXISTS news 
-                            (id INTEGER PRIMARY KEY AUTOINCREMENT, 
-                             title VARCHAR(100),
-                             content VARCHAR(1000),
-                             user_id INTEGER
-                             )''')
-        cursor.close()
-        self.connection.commit()
-
-    def insert(self, title, content, user_id):
-        cursor = self.connection.cursor()
-        cursor.execute('''INSERT INTO news 
-                          (title, content, user_id) 
-                          VALUES (?,?,?)''', (title, content, str(user_id)))
-        cursor.close()
-        self.connection.commit()
-
-    def get(self, news_id):
-        cursor = self.connection.cursor()
-        cursor.execute("SELECT * FROM news WHERE id = ?", (str(news_id)))
-        row = cursor.fetchone()
-        return row
-
-    def get_all(self, user_id=None):
-        cursor = self.connection.cursor()
-        if user_id:
-            cursor.execute("SELECT * FROM news WHERE user_id = ?",
-                           (str(user_id)))
-        else:
-            cursor.execute("SELECT * FROM news")
-        rows = cursor.fetchall()
-        return rows
-
-    def delete(self, news_id):
-        cursor = self.connection.cursor()
-        cursor.execute('''DELETE FROM news WHERE id = ?''', (str(news_id)))
-        cursor.close()
-        self.connection.commit()
+    def __repr__(self):
+        return '<SolutionAttempt {} {} {}>'.format(
+            self.id, self.task, self.status)

@@ -6,7 +6,10 @@
 
 {% block content %}
     <h1>Administration tool bar</h1>
-    {% for user in users %}
-        {{ user[1] }} made {{ news.get_all(user[0])|length }} articles <br>
+    {% for solution in solutions %}
+        <br>
+        {{ solution.student.id }}-----{{ solution.task }}-----<a href="/status/{{ solution.id }}/ok">OK</a>---<a href="/status/{{ solution.id }}/wrong">WRONG</a>
+        <br>Code:<br>{{ solution.code }}<br>
+        -----------------------------------------------------------------------------------------------------------
     {% endfor %}
 {% endblock %}
