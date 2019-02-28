@@ -13,29 +13,44 @@ def index():
     except KeyError as err:
         return redirect('/login')
 
-@app.route('/send')
-def send():
-    try:
-        if session['username']:
-            form = SolutionForm
-            if form.validate_on_submit():
-                task = request.form['task']
-                code = request.form['code']
-                solution = SolutionAttempt(task=task, code=code, status='check', student_id=)
-    except Exception as err:
-        pass
-    return redirect('/')
+@app.errorhandler(404)
+def not_found(error):
+    return make_response(jsonify({'error': 'Not found'}), 404)
 
-@app.route('/status/<int:id>/<stat>')
-def status(id, stat):
-    try:
-        if session['username'] == 'admin':
-            solution = SolutionAttempt.query.filter_by(id=id).first()
-            solution.status = stat
-            db.session.commit()
-    except Exception as err:
-        return redirect('/')
+@app.route('/news', methods=['GET'])
+def get_news():
+    news = NewsModel.query.all()
+    return jsonify({'news': news})
 
+@app.route('/news', methods=['POST'])
+def add_news():
+    if not request.json:
+        return jsonify({'error': 'Empty request'})
+    elif not all(key in request.json for key in ['title', 'content', 'user_id']):
+        return jsonify({'error': 'Bad request'})
+    news = NewsModel(title=request.json['title'], content=request.json['content'])
+    user = UserModel.query.filter_by(id=request.json['user_id']).first()
+    if not user:
+        return jsonify({'error': 'User not found'})
+    user.NewsModel.append(news)
+    db.session.commit()
+    return jsonify({'success': 'OK'})
+
+@app.route('/news/<int:news_id>', methods=['DELETE'])
+def delete_news(news_id):
+    news = NewsModel.query.filter_by(id = news_id).first()
+    if not news:
+        return jsonify({'error': 'Not found'})
+    db.session.delete(news)
+    db.session.commit()
+    return jsonify({'success': 'OK'})
+
+@app.route('/news/<int:news_id>',  methods=['GET'])
+def get_one_news(news_id):
+    news = NewsModel.query.filter_by(id=news_id)
+    if not news:
+        return jsonify({'error': 'Not found'})
+    return jsonify({'news': news})
 
 @app.route('/admin/login', methods=['GET', 'POST'])
 def admin_login():
@@ -52,7 +67,7 @@ def admin_login():
 def admin():
     try:
         if session['username'] == 'admin':
-            return render_template('admin.html', solutions=SolutionAttempt.query.filter_by(status='check'))
+            return render_template('admin.html')
     except KeyError as err:
         pass
     return redirect('/admin/login')
@@ -62,15 +77,10 @@ def sign_in():
     form = SignInForm()
     if form.validate_on_submit():
         login = request.form['login']
-        name = request.form['login']
-        surname = request.form['login']
-        email = request.form['login']
-        group = request.form['login']
-        year = request.form['login']
-        user = YandexLyceumStudent.query.filter_by(username=login).first()
+        password = request.form['password']
+        user = UserModel.query.filter_by(username=login).first()
         if not bool(user):
-            new_user = YandexLyceumStudent(username=login, year=year, name=name, email=email,
-                                           group=group, surname=surname)
+            new_user = UserModel(username=login, password=password)
             db.session.add(new_user)
             db.session.commit()
             return redirect("/")
@@ -89,8 +99,8 @@ def login():
     if form.validate_on_submit():
         login = request.form['login']
         password = request.form['password']
-        user = YandexLyceumStudent.query.filter_by(username=login).first()
-        if bool(user):
+        user = UserModel.query.filter_by(username=login).first()
+        if bool(user) and user.passoword == password:
             session['username'] = login
             session['user_id'] = user.id
             return redirect("/index")
