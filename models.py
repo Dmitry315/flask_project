@@ -16,7 +16,7 @@ class NewsModel(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(80), unique=False, nullable=False)
     content = db.Column(db.String(1000), unique=False, nullable=False)
-    user_id = db.Column(db.Integer, db.ForeignKey('User.id'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user_model.id'), nullable=False)
     user = db.relationship('UserModel', backref=db.backref('NewsModel', lazy=True))
     def __repr__(self):
         return '<NewsModel {} {} {}>'.format(self.id, self.title, self.content)

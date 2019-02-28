@@ -22,6 +22,20 @@ def get_news():
     news = NewsModel.query.all()
     return jsonify({'news': news})
 
+app.route('/news/edit')
+def edit():
+    if not request.json:
+        return jsonify({'error': 'Empty request'})
+    elif not all(key in request.json for key in ['news_id']) or not(any(key in request.json for key in ['title', 'content'])):
+        return jsonify({'error': 'Bad request'})
+    news = NewsModel.query.filter_by(id=request.json['news_id'])
+    if bool(news):
+        return jsonify({'error': 'Not found'})
+    if 'title' in request.json:
+        news.title = request.json['title']
+    if 'content' in request.json:
+        news.content = request.json['content']
+    return jsonify({'success': 'OK'})
 @app.route('/news', methods=['POST'])
 def add_news():
     if not request.json:
@@ -31,7 +45,7 @@ def add_news():
     news = NewsModel(title=request.json['title'], content=request.json['content'])
     user = UserModel.query.filter_by(id=request.json['user_id']).first()
     if not user:
-        return jsonify({'error': 'User not found'})
+        return jsonify({'error': 'Not found'})
     user.NewsModel.append(news)
     db.session.commit()
     return jsonify({'success': 'OK'})
